@@ -1,0 +1,97 @@
+---
+title: "Lab 6 Comparing two means"
+author: "Beau Ayers"
+date: 4/26/2021
+output: github_document
+---
+
+Researchers studying the number of electric fish species living in various parts of the Amazon basin were interested in whether the presence of tributaries affected the local number of electric fish species in the main rivers (Fernandes et al. 2004).
+
+They counted the number of electric fish species above and below the entrance point of a major tributary at 12 different river locations.
+
+The data is provided in your GitHub repository.
+
+For each question below, write a sentence answering the question and show the code you used to come up with the answer, if applicable.
+
+## Question A
+
+> What is the mean different in the number of species between areas upstream and downstream of a tributary? What is the 95% confidence interval of this mean difference. Show your code and write a sentence giving your answer
+
+ANSWER
+
+```{r}
+# load packages -----------------------------------------------------------
+
+library(tidyverse)
+
+
+# read data ---------------------------------------------------------------
+
+fish <- read_csv("chap12q19ElectricFish.csv")
+
+# put data in tidy format ------------------------------------------------
+
+fish_long <- 
+  pivot_longer(fish, speciesUpstream:speciesDownstream,
+               names_to = "location",
+               values_to = "species") %>% 
+  mutate(location = str_remove(location, c("species"))) %>% 
+  print()
+
+# do stuff ----------------------------------------------------------------
+
+ttest_results <- t.test(formula = species ~ location, data = fish_long)
+
+ttest_results
+```
+
+The mean difference is 1.833333. The 95% confidence interval is
+-4.587031 to 8.253697.
+
+## Question B
+
+> Test the hypothesis that the tributaries have no effect on the number of species of electric fish.
+
+ANSWER
+
+```{r}
+ttest_results <- t.test(formula = species ~ location, data = fish_long)
+
+ttest_results
+```
+
+There is no evidence that tributries have an effect on the number
+of species because the p-value is greater than 0.05.
+
+## Question C
+
+> State the assumptions that you had to make to complete parts (A) and (B). Create a graph to assess whether one of those assumptions was met.
+
+ANSWER
+
+```{r}
+fish_sum <-
+  fish_long %>%
+  group_by(location) %>%
+  summarize(
+    sampl_size = n(),
+    mean = mean(species),
+    str_dev = sd(species),
+    var = var(species),
+    sem = sd(species) / sqrt(n()),
+    ci_upper = mean + 2 * sem,
+    ci_lower = mean - 2 * sem,
+  )
+
+fish_sum
+
+ggplot(data = fish_long) +
+  geom_jitter(mapping = aes(x = location, y = species)) +
+  geom_crossbar(
+    data = fish_sum,
+    mapping = aes(x = location, y = mean, ymax = ci_upper, ymin = ci_lower),
+    color = "cyan3"
+  )
+```
+
+I had to assume that the p-value was 0.05.
