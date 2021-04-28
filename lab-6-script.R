@@ -50,3 +50,55 @@ ggplot(data = fish_long) +
     mapping = aes(x = location, y = mean, ymax = ci_upper, ymin = ci_lower),
     color = "cyan3"
   )
+
+fish_long %>% 
+  ggplot(aes(x = species)) +
+  geom_histogram(
+    aes(fill = location), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid")) +
+  theme_minimal()
+
+
+# Crabs -------------------------------------------------------------------
+
+crabs <- read_csv("chap15q27FiddlerCrabFans.csv")
+
+
+# Code for crab graphs ----------------------------------------------------
+
+crab_sum <-
+  crabs %>%
+  group_by(crabType) %>%
+  summarize(
+    sampl_size = n(),
+    mean = mean(bodyTemp),
+    str_dev = sd(bodyTemp),
+    var = var(bodyTemp),
+    sem = sd(bodyTemp) / sqrt(n()),
+    ci_upper = mean + 2 * sem,
+    ci_lower = mean - 2 * sem,
+  )
+
+crab_sum
+
+ggplot(data = crabs) +
+  geom_jitter(mapping = aes(x = crabType, y = bodyTemp)) +
+  geom_crossbar(
+    data = crab_sum,
+    mapping = aes(x = crabType, y = mean, ymax = ci_upper, ymin = ci_lower),
+    color = "cyan3"
+  )
+
+
+# ANOVA crabs -------------------------------------------------------------
+
+aov_crabs <-
+  aov(bodyTemp ~ crabType, data = crabs)
+aov_crabs
+
+summary(aov_crabs)

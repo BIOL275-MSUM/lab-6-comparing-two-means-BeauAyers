@@ -176,4 +176,139 @@ ggplot(data = fish_long) +
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
+``` r
+fish_long %>% 
+  ggplot(aes(x = species)) +
+  geom_histogram(
+    aes(fill = location), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid")) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+
 I had to assume that the p-value was 0.05.
+
+# ANOVA
+
+Fiddler crabs are so called because males have a greatly enlarged
+“major” claw, which is used to attract females and to defend a burrow.
+
+Darnell and Munguia (2011) recently suggested that this appendage might
+also act as a heat sink, keeping males cooler while out of the burrow on
+hot days.
+
+To test this, they placed four groups of crabs into separate plastic
+cups and supplied a source of radiant heat (60-watt light bulb) from
+above. The four groups were intact male crabs, male crabs with the major
+claw removed; male crabs with the other (minor) claw removed (control);
+and intact female fiddler crabs.
+
+They measured the body temperature of crabs every 10 minutes for 1.5
+hours. These measurements were used to calculate a rate of heat gain for
+every individual crab in degrees C/log minute. Rates of heat gain for
+all crabs are provided in the accompanying data file.
+
+## Question D
+
+Graph the distribution of body temperatures for each crab type:
+
+``` r
+# Crabs -------------------------------------------------------------------
+
+crabs <- read_csv("chap15q27FiddlerCrabFans.csv")
+```
+
+    ## 
+    ## -- Column specification --------------------------------------------------------
+    ## cols(
+    ##   crabType = col_character(),
+    ##   bodyTemp = col_double()
+    ## )
+
+``` r
+# Code for crab graphs ----------------------------------------------------
+
+crab_sum <-
+  crabs %>%
+  group_by(crabType) %>%
+  summarize(
+    sampl_size = n(),
+    mean = mean(bodyTemp),
+    str_dev = sd(bodyTemp),
+    var = var(bodyTemp),
+    sem = sd(bodyTemp) / sqrt(n()),
+    ci_upper = mean + 2 * sem,
+    ci_lower = mean - 2 * sem,
+  )
+
+crab_sum
+```
+
+    ## # A tibble: 4 x 8
+    ##   crabType           sampl_size  mean str_dev    var    sem ci_upper ci_lower
+    ##   <chr>                   <int> <dbl>   <dbl>  <dbl>  <dbl>    <dbl>    <dbl>
+    ## 1 female                     21  1.68   0.197 0.0389 0.0430     1.76     1.59
+    ## 2 intact male                21  1.29   0.226 0.0513 0.0494     1.38     1.19
+    ## 3 male major removed         21  1.41   0.215 0.0463 0.0469     1.51     1.32
+    ## 4 male minor removed         21  1.21   0.192 0.0369 0.0419     1.29     1.13
+
+``` r
+ggplot(data = crabs) +
+  geom_jitter(mapping = aes(x = crabType, y = bodyTemp)) +
+  geom_crossbar(
+    data = crab_sum,
+    mapping = aes(x = crabType, y = mean, ymax = ci_upper, ymin = ci_lower),
+    color = "cyan3"
+  )
+```
+
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+## Question E
+
+Does body temperature varies among crab types? State the null and
+alternative hypothesis, conduct and ANOVA, and interpret the results.
+
+``` r
+# ANOVA crabs -------------------------------------------------------------
+
+aov_crabs <-
+  aov(bodyTemp ~ crabType, data = crabs)
+aov_crabs
+```
+
+    ## Call:
+    ##    aov(formula = bodyTemp ~ crabType, data = crabs)
+    ## 
+    ## Terms:
+    ##                 crabType Residuals
+    ## Sum of Squares  2.641310  3.467619
+    ## Deg. of Freedom        3        80
+    ## 
+    ## Residual standard error: 0.2081952
+    ## Estimated effects may be unbalanced
+
+``` r
+summary(aov_crabs)
+```
+
+    ##             Df Sum Sq Mean Sq F value Pr(>F)    
+    ## crabType     3  2.641  0.8804   20.31  7e-10 ***
+    ## Residuals   80  3.468  0.0433                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Body temperature does vary among crab types. This is apparent because
+the F value is greater than 1 and the p-value is far lower than 0.05.
+
+Null: There is no statistical difference in temperature among different
+crab types
+
+Alternative: There will be a statistical difference in temperature among
+different crab types

@@ -45,8 +45,7 @@ ttest_results <- t.test(formula = species ~ location, data = fish_long)
 ttest_results
 ```
 
-The mean difference is 1.833333. The 95% confidence interval is
--4.587031 to 8.253697.
+The mean difference is 1.833333. The 95% confidence interval is -4.587031 to 8.253697.
 
 ## Question B
 
@@ -60,8 +59,7 @@ ttest_results <- t.test(formula = species ~ location, data = fish_long)
 ttest_results
 ```
 
-There is no evidence that tributries have an effect on the number
-of species because the p-value is greater than 0.05.
+There is no evidence that tributries have an effect on the number of species because the p-value is greater than 0.05.
 
 ## Question C
 
@@ -92,6 +90,84 @@ ggplot(data = fish_long) +
     mapping = aes(x = location, y = mean, ymax = ci_upper, ymin = ci_lower),
     color = "cyan3"
   )
+
+fish_long %>% 
+  ggplot(aes(x = species)) +
+  geom_histogram(
+    aes(fill = location), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid")) +
+  theme_minimal()
 ```
 
 I had to assume that the p-value was 0.05.
+
+# ANOVA 
+
+Fiddler crabs are so called because males have a greatly enlarged "major" claw, which is used to attract females and to defend a burrow.
+
+Darnell and Munguia (2011) recently suggested that this appendage might also act as a heat sink, keeping males cooler while out of the burrow on hot days.
+
+To test this, they placed four groups of crabs into separate plastic cups and supplied a source of radiant heat (60-watt light bulb) from above. The four groups were intact male crabs, male crabs with the major claw removed; male crabs with the other (minor) claw removed (control); and intact female fiddler crabs.
+
+They measured the body temperature of crabs every 10 minutes for 1.5 hours. These measurements were used to calculate a rate of heat gain for every individual crab in degrees C/log minute. Rates of heat gain for all crabs are provided in the accompanying data file.
+
+## Question D 
+
+Graph the distribution of body temperatures for each crab type:
+
+```{r}
+# Crabs -------------------------------------------------------------------
+
+crabs <- read_csv("chap15q27FiddlerCrabFans.csv")
+
+
+# Code for crab graphs ----------------------------------------------------
+
+crab_sum <-
+  crabs %>%
+  group_by(crabType) %>%
+  summarize(
+    sampl_size = n(),
+    mean = mean(bodyTemp),
+    str_dev = sd(bodyTemp),
+    var = var(bodyTemp),
+    sem = sd(bodyTemp) / sqrt(n()),
+    ci_upper = mean + 2 * sem,
+    ci_lower = mean - 2 * sem,
+  )
+
+crab_sum
+
+ggplot(data = crabs) +
+  geom_jitter(mapping = aes(x = crabType, y = bodyTemp)) +
+  geom_crossbar(
+    data = crab_sum,
+    mapping = aes(x = crabType, y = mean, ymax = ci_upper, ymin = ci_lower),
+    color = "cyan3"
+  )
+```
+
+## Question E 
+
+Does body temperature varies among crab types? State the null and alternative hypothesis, conduct and ANOVA, and interpret the results.
+
+```{r}
+# ANOVA crabs -------------------------------------------------------------
+
+aov_crabs <-
+  aov(bodyTemp ~ crabType, data = crabs)
+aov_crabs
+
+summary(aov_crabs)
+```
+
+Body temperature does vary among crab types. This is apparent because the F value is greater than 1 and the p-value is far lower than 0.05.
+
+Null: There is no statistical difference in temperature among different crab types
+
+Alternative: There will be a statistical difference in temperature among different crab types
