@@ -94,6 +94,18 @@ ggplot(data = crabs) +
     color = "cyan3"
   )
 
+crabs %>% 
+  ggplot(aes(x = bodyTemp)) +
+  geom_histogram(
+    aes(fill = crabType), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid", "cyan4", "#C24641")) +
+  theme_minimal()
+
 
 # ANOVA crabs -------------------------------------------------------------
 

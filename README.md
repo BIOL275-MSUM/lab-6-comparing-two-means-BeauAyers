@@ -192,7 +192,8 @@ fish_long %>%
 
 ![](README_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
 
-I had to assume that the p-value was 0.05.
+I had to assume that the p-value was 0.05. That it was a random sample
+and the distribution was normal
 
 # ANOVA
 
@@ -269,6 +270,22 @@ ggplot(data = crabs) +
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
+crabs %>% 
+  ggplot(aes(x = bodyTemp)) +
+  geom_histogram(
+    aes(fill = crabType), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid", "cyan4", "#C24641")) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
 ## Question E
 

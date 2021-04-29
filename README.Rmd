@@ -104,9 +104,9 @@ fish_long %>%
   theme_minimal()
 ```
 
-I had to assume that the p-value was 0.05.
+I had to assume that the p-value was 0.05. That it was a random sample and the distribution was normal
 
-# ANOVA 
+# ANOVA
 
 Fiddler crabs are so called because males have a greatly enlarged "major" claw, which is used to attract females and to defend a burrow.
 
@@ -116,7 +116,7 @@ To test this, they placed four groups of crabs into separate plastic cups and su
 
 They measured the body temperature of crabs every 10 minutes for 1.5 hours. These measurements were used to calculate a rate of heat gain for every individual crab in degrees C/log minute. Rates of heat gain for all crabs are provided in the accompanying data file.
 
-## Question D 
+## Question D
 
 Graph the distribution of body temperatures for each crab type:
 
@@ -150,9 +150,21 @@ ggplot(data = crabs) +
     mapping = aes(x = crabType, y = mean, ymax = ci_upper, ymin = ci_lower),
     color = "cyan3"
   )
+
+crabs %>% 
+  ggplot(aes(x = bodyTemp)) +
+  geom_histogram(
+    aes(fill = crabType), 
+    bins = 8, 
+    alpha = 0.5, 
+    position = "identity",
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = c("darkorange", "darkorchid", "cyan4", "#C24641")) +
+  theme_minimal()
 ```
 
-## Question E 
+## Question E
 
 Does body temperature varies among crab types? State the null and alternative hypothesis, conduct and ANOVA, and interpret the results.
 
